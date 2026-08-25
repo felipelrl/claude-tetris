@@ -172,6 +172,53 @@ body {
   transform: translateX(18px);
 }
 
+/* ---- Selector de skin ---- */
+.skin-select-section {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skin-select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---- Skins visuales (aspecto del tablero/panel; el color de los bloques
+   se dibuja en canvas dentro de game.js) ---- */
+body.skin-neon {
+  --board-bg: #000000;
+  --board-border: #00e5ff;
+  --grid-line: #0a2a33;
+}
+
+body.skin-neon #board,
+body.skin-neon #next-canvas {
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.35), 0 0 48px rgba(0, 0, 0, 0.6);
+}
+
+body.skin-pastel {
+  --board-bg: #fdf6f9;
+  --board-border: #f0d9ea;
+  --grid-line: #f3e6f0;
+}
+
+body.skin-pastel #board,
+body.skin-pastel #next-canvas {
+  border-radius: 16px;
+}
+
+body.skin-pixel {
+  --board-bg: #14141c;
+  --grid-line: #2a2a3a;
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;
