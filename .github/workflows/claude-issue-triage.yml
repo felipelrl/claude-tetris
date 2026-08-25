@@ -1,0 +1,42 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Issue Triage
+        id: claude-triage
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowedTools "Bash(gh issue view:*),Bash(gh label list:*),Bash(gh issue edit:*),Bash(gh issue comment:*)"'
+          prompt: |
+            Analiza el issue #${{ github.event.issue.number }} del repo ${{ github.repository }} (Tetris en JS vanilla, ver CLAUDE.md para arquitectura).
+
+            Pasos:
+            1. Ejecuta `gh issue view ${{ github.event.issue.number }} --json title,body,labels` para leer el issue.
+            2. Ejecuta `gh label list` para ver labels disponibles del repo.
+            3. Según el contenido, aplica las labels apropiadas con `gh issue edit ${{ github.event.issue.number }} --add-label "<label1>,<label2>"`. Usa solo labels ya existentes (bug, enhancement, documentation, accessibility, question, good first issue, help wanted, duplicate, invalid, wontfix). No crees labels nuevas. Si ya tiene labels correctas, no dupliques.
+            4. Publica un comentario de diagnóstico con `gh issue comment ${{ github.event.issue.number }} --body "..."` en español, con este formato:
+               ## Diagnóstico automático
+               **Diagnóstico**: causa probable / naturaleza del problema, referenciando archivos/funciones relevantes de game.js, index.html o style.css cuando aplique (ver CLAUDE.md para arquitectura del proyecto).
+               **Alcance estimado**: bajo/medio/alto.
+               **Notas para la solución**: puntos clave a considerar al implementar el fix (sin escribir el código todavía).
+
+            No modifiques código ni abras PRs. Solo labels y el comentario de diagnóstico.
