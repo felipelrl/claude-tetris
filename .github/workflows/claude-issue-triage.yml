@@ -33,7 +33,7 @@ jobs:
             1. Ejecuta `gh issue view ${{ github.event.issue.number }} --json title,body,labels` para leer el issue.
             2. Ejecuta `gh label list` para ver labels disponibles del repo.
             3. Según el contenido, aplica las labels apropiadas con `gh issue edit ${{ github.event.issue.number }} --add-label "<label1>,<label2>"`. Usa solo labels ya existentes (bug, enhancement, documentation, accessibility, question, good first issue, help wanted, duplicate, invalid, wontfix). No crees labels nuevas. Si ya tiene labels correctas, no dupliques.
-            4. Publica un comentario de diagnóstico con `gh issue comment ${{ github.event.issue.number }} --body "..."` en español, con este formato:
+            4. Publica un comentario de diagnóstico con `gh issue comment ${{ github.event.issue.number }} --body "..."` en español, escrito en Markdown válido que GitHub renderice bien (encabezados `##`, negritas `**...**`, listas `-`, bloques de código con triple backtick cuando cites fragmentos de game.js/index.html/style.css), con este formato:
                ## Diagnóstico automático
                **Diagnóstico**: causa probable / naturaleza del problema, referenciando archivos/funciones relevantes de game.js, index.html o style.css cuando aplique (ver CLAUDE.md para arquitectura del proyecto).
                **Alcance estimado**: bajo/medio/alto.
