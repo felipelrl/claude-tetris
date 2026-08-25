@@ -45,6 +45,17 @@ const REWARD_TYPE = 11; // pieza única 1x1, recompensa tras un Tetris
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
+const WILDCARD = -1; // valor de celda para "comodín"; fuera del rango de índices de PIECES/COLORS para no colisionar con ningún tipo de pieza
+const SPECIAL_LINE_INTERVAL = 5; // cada N líneas eliminadas, la próxima pieza generada es especial
+const SPECIAL_TYPES = ['bomb', 'rayo', 'tinte', 'gravedad', 'congelar'];
+const SPECIAL_INFO = {
+  bomb: { color: '#ff5252', symbol: '💣' },
+  rayo: { color: '#fff176', symbol: '⚡' },
+  tinte: { color: '#f06292', symbol: '🎨' },
+  gravedad: { color: '#a1887f', symbol: '⬇' },
+  congelar: { color: '#4dd0e1', symbol: '❄' },
+};
+
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
@@ -61,6 +72,7 @@ const themeSwitch = document.getElementById('theme-switch');
 const THEME_STORAGE_KEY = 'tetris-theme';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, rewardPending;
+let pendingSpecial, freezeUntil;
 
 function gridLineColor() {
   return getComputedStyle(document.body).getPropertyValue('--grid-line').trim();
@@ -89,7 +101,11 @@ function pieceFromType(type) {
   return { type, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
 }
 
-function randomPiece() {
+function randomPiece(special) {
+  if (special) {
+    const kind = SPECIAL_TYPES[Math.floor(Math.random() * SPECIAL_TYPES.length)];
+    return { special: kind, shape: [[1]], x: Math.floor(COLS / 2), y: 0 };
+  }
   const roll = Math.random();
   let type;
   if (roll < CHALLENGE_CHANCE) {
@@ -154,11 +170,15 @@ function clearLines() {
     }
   }
   if (cleared) {
+    const before = lines;
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
     level = Math.floor(lines / 10) + 1;
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     if (cleared === 4) rewardPending = true;
+    if (Math.floor(lines / SPECIAL_LINE_INTERVAL) > Math.floor(before / SPECIAL_LINE_INTERVAL)) {
+      pendingSpecial = true;
+    }
     updateHUD();
   }
 }
@@ -187,15 +207,77 @@ function softDrop() {
 }
 
 function lockPiece() {
-  merge();
+  if (current.special) {
+    applySpecialEffect(current.special, current.x, current.y);
+  } else {
+    merge();
+  }
   clearLines();
   spawn();
 }
 
+function applyBomb(cx, cy) {
+  for (let r = cy - 1; r <= cy + 1; r++)
+    for (let c = cx - 1; c <= cx + 1; c++)
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS) board[r][c] = 0;
+}
+
+function applyRayo(cx, cy) {
+  if (cy >= 0 && cy < ROWS) board[cy].fill(0);
+  if (cx >= 0 && cx < COLS) for (let r = 0; r < ROWS; r++) board[r][cx] = 0;
+}
+
+function applyTinte() {
+  const present = new Set();
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (board[r][c] && board[r][c] !== WILDCARD) present.add(board[r][c]);
+  if (!present.size) return;
+  const colors = [...present];
+  const target = colors[Math.floor(Math.random() * colors.length)];
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (board[r][c] === target) board[r][c] = WILDCARD;
+}
+
+function applyGravedad() {
+  for (let c = 0; c < COLS; c++) {
+    const vals = [];
+    for (let r = 0; r < ROWS; r++) if (board[r][c]) vals.push(board[r][c]);
+    const startRow = ROWS - vals.length;
+    for (let r = 0; r < ROWS; r++) board[r][c] = r >= startRow ? vals[r - startRow] : 0;
+  }
+}
+
+function applyCongelar() {
+  freezeUntil = performance.now() + 5000;
+}
+
+const SPECIAL_EFFECTS = {
+  bomb: applyBomb,
+  rayo: applyRayo,
+  tinte: applyTinte,
+  gravedad: applyGravedad,
+  congelar: applyCongelar,
+};
+
+function applySpecialEffect(type, cx, cy) {
+  SPECIAL_EFFECTS[type](cx, cy);
+  score += 50;
+  updateHUD();
+}
+
 function spawn() {
   current = next;
-  next = rewardPending ? pieceFromType(REWARD_TYPE) : randomPiece();
+  if (rewardPending) {
+    next = pieceFromType(REWARD_TYPE);
+  } else if (pendingSpecial) {
+    next = randomPiece(true);
+  } else {
+    next = randomPiece();
+  }
   rewardPending = false;
+  pendingSpecial = false;
   if (collide(current.shape, current.x, current.y)) {
     endGame();
   }
@@ -210,13 +292,27 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const isWildcard = colorIndex === WILDCARD;
+  const color = isWildcard ? '#fff8e1' : COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
   // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
+  context.fillStyle = isWildcard ? 'rgba(255,215,0,0.35)' : 'rgba(255,255,255,0.12)';
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  context.globalAlpha = 1;
+}
+
+function drawSpecialBlock(context, x, y, type, size, alpha) {
+  const info = SPECIAL_INFO[type];
+  context.globalAlpha = alpha ?? 1;
+  context.fillStyle = info.color;
+  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+  context.fillStyle = '#1a1a1a';
+  context.font = `${Math.floor(size * 0.6)}px sans-serif`;
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText(info.symbol, x * size + size / 2, y * size + size / 2 + 1);
   context.globalAlpha = 1;
 }
 
@@ -246,22 +342,40 @@ function draw() {
     for (let c = 0; c < COLS; c++)
       drawBlock(ctx, c, r, board[r][c], BLOCK);
 
-  // ghost
+  // ghost + current piece
   const gy = ghostY();
-  for (let r = 0; r < current.shape.length; r++)
-    for (let c = 0; c < current.shape[r].length; c++)
-      if (current.shape[r][c])
-        drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
+  if (current.special) {
+    drawSpecialBlock(ctx, current.x, gy, current.special, BLOCK, 0.35);
+    drawSpecialBlock(ctx, current.x, current.y, current.special, BLOCK);
+  } else {
+    for (let r = 0; r < current.shape.length; r++)
+      for (let c = 0; c < current.shape[r].length; c++)
+        if (current.shape[r][c])
+          drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
 
-  // current piece
-  for (let r = 0; r < current.shape.length; r++)
-    for (let c = 0; c < current.shape[r].length; c++)
-      drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
+    for (let r = 0; r < current.shape.length; r++)
+      for (let c = 0; c < current.shape[r].length; c++)
+        drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
+  }
+
+  if (performance.now() < freezeUntil) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(128,222,234,0.9)';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('CONGELADO', canvas.width / 2, 20);
+    ctx.restore();
+  }
 }
 
 function drawNext() {
   const NB = 30;
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  if (next.special) {
+    drawSpecialBlock(nextCtx, 1, 1, next.special, NB);
+    return;
+  }
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -295,13 +409,15 @@ function togglePause() {
 function loop(ts) {
   const dt = ts - lastTime;
   lastTime = ts;
-  dropAccum += dt;
-  if (dropAccum >= dropInterval) {
-    dropAccum = 0;
-    if (!collide(current.shape, current.x, current.y + 1)) {
-      current.y++;
-    } else {
-      lockPiece();
+  if (performance.now() >= freezeUntil) {
+    dropAccum += dt;
+    if (dropAccum >= dropInterval) {
+      dropAccum = 0;
+      if (!collide(current.shape, current.x, current.y + 1)) {
+        current.y++;
+      } else {
+        lockPiece();
+      }
     }
   }
   if (gameOver) return;
@@ -319,6 +435,8 @@ function init() {
   dropInterval = 1000;
   dropAccum = 0;
   rewardPending = false;
+  pendingSpecial = false;
+  freezeUntil = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
