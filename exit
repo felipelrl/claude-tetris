@@ -1,0 +1,91 @@
+*   [33mcommit 22e6a8f028f8bc52787b47d4a1dae169710c2946[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+[31m|[m[32m\[m  Merge: 5922e3a 7407425
+[31m|[m [32m|[m Author: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[31m|[m [32m|[m Date:   Mon Aug 24 23:57:19 2026 -0400
+[31m|[m [32m|[m 
+[31m|[m [32m|[m     Merge pull request #7 from felipelrl/claude/issue-5-20260825-0353
+[31m|[m [32m|[m     
+[31m|[m [32m|[m     Add light/dark theme toggle, defaulting to dark mode
+[31m|[m [32m|[m 
+[31m|[m * [33mcommit 7407425f009880278ed721f858ca5a4250cf7521[m
+[31m|[m[31m/[m  Author: claude[bot] <41898282+claude[bot]@users.noreply.github.com>
+[31m|[m   Date:   Tue Aug 25 03:55:14 2026 +0000
+[31m|[m   
+[31m|[m       Add light/dark theme toggle, defaulting to dark mode
+[31m|[m       
+[31m|[m       Adds a switch in the side panel that lets players toggle between the
+[31m|[m       default dark theme and a new light theme. Colors are driven by CSS
+[31m|[m       custom properties (with a light-theme override on body), and the
+[31m|[m       canvas grid line color is read from CSS at draw time so it follows
+[31m|[m       the active theme. The preference persists in localStorage.
+[31m|[m       
+[31m|[m       Closes #5
+[31m|[m       
+[31m|[m       Co-authored-by: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[31m|[m   
+*   [33mcommit 5922e3a68781edf97d4a4b704a626c35f21c5113[m
+[33m|[m[34m\[m  Merge: 21ab2aa f6ed668
+[33m|[m [34m|[m Author: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[33m|[m [34m|[m Date:   Mon Aug 24 23:52:34 2026 -0400
+[33m|[m [34m|[m 
+[33m|[m [34m|[m     Merge pull request #6 from felipelrl/claude/issue-4-20260825-0350
+[33m|[m [34m|[m     
+[33m|[m [34m|[m     Fix: color de la pieza J a azul pálido
+[33m|[m [34m|[m 
+[33m|[m * [33mcommit f6ed668ad3d7cb2b1b73893c537e0149d1d5efe2[m
+[33m|[m[33m/[m  Author: claude[bot] <41898282+claude[bot]@users.noreply.github.com>
+[33m|[m   Date:   Tue Aug 25 03:50:43 2026 +0000
+[33m|[m   
+[33m|[m       Fix J piece color to pale blue
+[33m|[m       
+[33m|[m       Co-authored-by: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[33m|[m 
+* [33mcommit 21ab2aa62dd4eefc819dba4d94e41540f2858b13[m
+[34m|[m Author: Felipe <flemo@lipigas.cl>
+[34m|[m Date:   Mon Aug 24 23:23:57 2026 -0400
+[34m|[m 
+[34m|[m     Add Claude Issue Triage workflow and CLAUDE.md documentation
+[34m|[m   
+*   [33mcommit 2d95c63d33a6badf24da4d3bebe0a5263b6a03eb[m
+[35m|[m[36m\[m  Merge: 78d22b2 4aa8eef
+[35m|[m [36m|[m Author: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[35m|[m [36m|[m Date:   Mon Aug 24 22:39:06 2026 -0400
+[35m|[m [36m|[m 
+[35m|[m [36m|[m     Merge pull request #3 from felipelrl/claude/issue-2-20260825-0229
+[35m|[m [36m|[m     
+[35m|[m [36m|[m     Agregar título visible del juego en la interfaz
+[35m|[m [36m|[m 
+[35m|[m * [33mcommit 4aa8eef543ca54e684e86ffdfc5eacb46706b5ae[m[33m ([m[1;31morigin/claude/issue-2-20260825-0229[m[33m)[m
+[35m|[m[35m/[m  Author: claude[bot] <41898282+claude[bot]@users.noreply.github.com>
+[35m|[m   Date:   Tue Aug 25 02:29:38 2026 +0000
+[35m|[m   
+[35m|[m       Agregar título visible "TETRIS" en la interfaz del juego
+[35m|[m       
+[35m|[m       Co-authored-by: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[35m|[m   
+*   [33mcommit 78d22b2a54416d177412a986a0691e6a865c0fda[m
+[1;31m|[m[1;32m\[m  Merge: 0ca1b79 fe3aae1
+[1;31m|[m [1;32m|[m Author: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[1;31m|[m [1;32m|[m Date:   Mon Aug 24 22:06:56 2026 -0400
+[1;31m|[m [1;32m|[m 
+[1;31m|[m [1;32m|[m     Merge pull request #1 from felipelrl/add-claude-github-actions-1787623309815
+[1;31m|[m [1;32m|[m     
+[1;31m|[m [1;32m|[m     Add Claude Code GitHub Workflow
+[1;31m|[m [1;32m|[m 
+[1;31m|[m * [33mcommit fe3aae1ec79b942ff00ea1b1bc093026c7d7dfc7[m
+[1;31m|[m [1;32m|[m Author: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[1;31m|[m [1;32m|[m Date:   Mon Aug 24 22:01:45 2026 -0400
+[1;31m|[m [1;32m|[m 
+[1;31m|[m [1;32m|[m     "Claude Code Review workflow"
+[1;31m|[m [1;32m|[m 
+[1;31m|[m * [33mcommit d872551bab7df50dd0115744f37ce4d7d22745e1[m
+[1;31m|[m[1;31m/[m  Author: Felipe Lemo <57124392+felipelrl@users.noreply.github.com>
+[1;31m|[m   Date:   Mon Aug 24 22:01:43 2026 -0400
+[1;31m|[m   
+[1;31m|[m       "Claude PR Assistant workflow"
+[1;31m|[m 
+* [33mcommit 0ca1b79d885b593452e632c3350946048caa5374[m
+  Author: Fernando Herrera <fernando.herrera85@gmail.com>
+  Date:   Wed Apr 29 14:40:36 2026 -0400
+  
+      First commit
