@@ -28,6 +28,18 @@
   --toggle-thumb-bg: #7aa2f7;
 }
 
+body.skin-neon {
+  --board-border: #00e5ff;
+  --board-bg: #000000;
+  --grid-line: #0a2a30;
+}
+
+body.skin-pastel {
+  --board-border: #d8bbf0;
+  --board-bg: #fff5f8;
+  --grid-line: #f0e4f5;
+}
+
 body.light-theme {
   --bg: #f0f1f5;
   --text: #1c1c26;
@@ -170,6 +182,18 @@ body {
 
 .theme-toggle input:checked + .theme-toggle-track .theme-toggle-thumb {
   transform: translateX(18px);
+}
+
+/* ---- Selector de skin ---- */
+.skin-select {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 4px 6px;
+  cursor: pointer;
 }
 
 /* ---- Controles ---- */
