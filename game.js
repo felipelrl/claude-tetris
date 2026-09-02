@@ -68,8 +68,41 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeSwitch = document.getElementById('theme-switch');
+const skinSelect = document.getElementById('skin-select');
 
 const THEME_STORAGE_KEY = 'tetris-theme';
+const SKIN_STORAGE_KEY = 'tetris-skin';
+
+// Paletas por skin (mismo índice que COLORS/PIECES). "Retro" reutiliza los colores base.
+const SKIN_PALETTES = {
+  retro: COLORS,
+  pixel: COLORS,
+  neon: [
+    null,
+    '#00fff2', '#faff00', '#ff2bd6', '#39ff14', '#ff2050',
+    '#00aaff', '#ff9100', '#ff00aa', '#00ffb3', '#8f5bff',
+    '#ffffff', '#ff5500',
+  ],
+  pastel: [
+    null,
+    '#a8e6ea', '#fff3b0', '#e0bbe4', '#c1e8c1', '#f4a9a8',
+    '#b8d8f2', '#ffd9a8', '#f9c6d8', '#a3ded1', '#c3c6f0',
+    '#ffffff', '#f7c9a8',
+  ],
+};
+
+const SKINS = ['retro', 'neon', 'pastel', 'pixel'];
+let currentSkin = 'retro';
+
+function roundRectPath(context, x, y, w, h, r) {
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + w, y, x + w, y + h, r);
+  context.arcTo(x + w, y + h, x, y + h, r);
+  context.arcTo(x, y + h, x, y, r);
+  context.arcTo(x, y, x + w, y, r);
+  context.closePath();
+}
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, rewardPending;
 let pendingSpecial, freezeUntil;
@@ -90,6 +123,19 @@ function initTheme() {
   themeSwitch.addEventListener('change', () => {
     applyTheme(themeSwitch.checked ? 'light' : 'dark');
   });
+}
+
+function applySkin(skin) {
+  currentSkin = SKINS.includes(skin) ? skin : 'retro';
+  document.body.setAttribute('data-skin', currentSkin);
+  skinSelect.value = currentSkin;
+  localStorage.setItem(SKIN_STORAGE_KEY, currentSkin);
+}
+
+function initSkin() {
+  const stored = localStorage.getItem(SKIN_STORAGE_KEY);
+  applySkin(stored);
+  skinSelect.addEventListener('change', () => applySkin(skinSelect.value));
 }
 
 function createBoard() {
@@ -290,10 +336,7 @@ function updateHUD() {
   levelEl.textContent = level;
 }
 
-function drawBlock(context, x, y, colorIndex, size, alpha) {
-  if (!colorIndex) return;
-  const isWildcard = colorIndex === WILDCARD;
-  const color = isWildcard ? '#fff8e1' : COLORS[colorIndex];
+function drawBlockRetro(context, x, y, color, isWildcard, size, alpha) {
   context.globalAlpha = alpha ?? 1;
   context.fillStyle = color;
   context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
@@ -301,6 +344,75 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   context.fillStyle = isWildcard ? 'rgba(255,215,0,0.35)' : 'rgba(255,255,255,0.12)';
   context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
   context.globalAlpha = 1;
+}
+
+function drawBlockNeon(context, x, y, color, isWildcard, size, alpha) {
+  context.save();
+  context.globalAlpha = alpha ?? 1;
+  context.fillStyle = '#050505';
+  context.fillRect(x * size + 2, y * size + 2, size - 4, size - 4);
+  context.shadowColor = color;
+  context.shadowBlur = size * 0.6;
+  context.strokeStyle = color;
+  context.lineWidth = 2;
+  context.strokeRect(x * size + 3, y * size + 3, size - 6, size - 6);
+  context.fillStyle = color;
+  context.globalAlpha = (alpha ?? 1) * (isWildcard ? 0.9 : 0.7);
+  context.fillRect(x * size + 6, y * size + 6, size - 12, size - 12);
+  context.restore();
+}
+
+function drawBlockPastel(context, x, y, color, isWildcard, size, alpha) {
+  context.save();
+  context.globalAlpha = alpha ?? 1;
+  const r = size * 0.22;
+  roundRectPath(context, x * size + 2, y * size + 2, size - 4, size - 4, r);
+  context.fillStyle = color;
+  context.fill();
+  context.fillStyle = isWildcard ? 'rgba(255,215,0,0.35)' : 'rgba(255,255,255,0.45)';
+  roundRectPath(context, x * size + 4, y * size + 4, size - 8, (size - 8) * 0.4, r * 0.6);
+  context.fill();
+  context.restore();
+}
+
+function drawBlockPixel(context, x, y, color, isWildcard, size, alpha) {
+  context.save();
+  context.globalAlpha = alpha ?? 1;
+  context.fillStyle = color;
+  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
+  const px = Math.max(3, Math.floor(size / 6));
+  for (let ry = 0; ry < size - 2; ry += px) {
+    for (let rx = 0; rx < size - 2; rx += px) {
+      const dark = ((rx / px + ry / px) % 2) === 0;
+      context.fillStyle = dark ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.18)';
+      context.fillRect(
+        x * size + 1 + rx,
+        y * size + 1 + ry,
+        Math.min(px, size - 2 - rx),
+        Math.min(px, size - 2 - ry)
+      );
+    }
+  }
+  context.strokeStyle = isWildcard ? 'rgba(255,215,0,0.6)' : 'rgba(0,0,0,0.5)';
+  context.lineWidth = 1;
+  context.strokeRect(x * size + 1.5, y * size + 1.5, size - 3, size - 3);
+  context.restore();
+}
+
+const SKIN_DRAWERS = {
+  retro: drawBlockRetro,
+  neon: drawBlockNeon,
+  pastel: drawBlockPastel,
+  pixel: drawBlockPixel,
+};
+
+function drawBlock(context, x, y, colorIndex, size, alpha) {
+  if (!colorIndex) return;
+  const isWildcard = colorIndex === WILDCARD;
+  const palette = SKIN_PALETTES[currentSkin] || COLORS;
+  const color = isWildcard ? '#fff8e1' : palette[colorIndex];
+  const drawer = SKIN_DRAWERS[currentSkin] || drawBlockRetro;
+  drawer(context, x, y, color, isWildcard, size, alpha);
 }
 
 function drawSpecialBlock(context, x, y, type, size, alpha) {
@@ -474,4 +586,5 @@ document.addEventListener('keydown', e => {
 restartBtn.addEventListener('click', init);
 
 initTheme();
+initSkin();
 init();

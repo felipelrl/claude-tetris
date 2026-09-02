@@ -172,6 +172,23 @@ body {
   transform: translateX(18px);
 }
 
+/* ---- Selector de skin ---- */
+.skin-select {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.skin-select:focus {
+  outline: 1px solid var(--value-color);
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;
@@ -251,4 +268,62 @@ kbd {
 
 #restart-btn:hover {
   background: var(--btn-bg-hover);
+}
+
+/* ---- Skins (independientes del toggle claro/oscuro) ---- */
+body[data-skin="neon"] {
+  --bg: #000000;
+  --board-bg: #000000;
+  --board-border: #00fff2;
+  --grid-line: #001414;
+  --title-color: #00fff2;
+  --value-color: #00fff2;
+  --label-color: #007a75;
+  --overlay-bg: rgba(0, 0, 0, 0.85);
+}
+
+body[data-skin="neon"] .game-title {
+  text-shadow: 0 0 8px #00fff2, 0 0 22px #00fff2;
+}
+
+body[data-skin="neon"] #board,
+body[data-skin="neon"] #next-canvas {
+  box-shadow: 0 0 24px rgba(0, 255, 242, 0.35);
+}
+
+body[data-skin="pastel"] {
+  --bg: #fdf3f7;
+  --board-bg: #fffdfb;
+  --board-border: #f2d4e4;
+  --grid-line: #f6e6ee;
+  --title-color: #e29bc0;
+  --value-color: #c98bb0;
+  --label-color: #c9a8bb;
+  --overlay-bg: rgba(253, 243, 247, 0.85);
+}
+
+body[data-skin="pastel"] #board,
+body[data-skin="pastel"] #next-canvas {
+  border-radius: 12px;
+  box-shadow: 0 0 24px rgba(226, 155, 192, 0.25);
+}
+
+body[data-skin="pixel"] {
+  --bg: #14141c;
+  --board-bg: #1c1c28;
+  --board-border: #4a4a5a;
+  --grid-line: #26263a;
+  --title-color: #ffd54f;
+  --value-color: #ffd54f;
+}
+
+body[data-skin="pixel"] .game-title,
+body[data-skin="pixel"] .value,
+body[data-skin="pixel"] .label {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+body[data-skin="pixel"] #board,
+body[data-skin="pixel"] #next-canvas {
+  image-rendering: pixelated;
 }
